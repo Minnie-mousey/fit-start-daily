@@ -48,15 +48,15 @@ export class SqliteWorkoutSessionRepository implements WorkoutSessionRepository 
     while (stmt.step()) {
       const r = stmt.getAsObject();
       rows.push({
-        id: String(r.id),
-        routineId: String(r.routine_id),
-        routineName: String(r.routine_name),
-        startedAt: String(r.started_at),
-        completedAt: String(r.completed_at),
-        durationSeconds: Number(r.duration_seconds),
-        exercisesCompleted: Number(r.exercises_completed),
-        totalExercises: Number(r.total_exercises),
-        status: r.status === "partial" ? "partial" : "completed",
+        id: String(r["id"]),
+        routineId: String(r["routine_id"]),
+        routineName: String(r["routine_name"]),
+        startedAt: String(r["started_at"]),
+        completedAt: String(r["completed_at"]),
+        durationSeconds: Number(r["duration_seconds"]),
+        exercisesCompleted: Number(r["exercises_completed"]),
+        totalExercises: Number(r["total_exercises"]),
+        status: r["status"] === "partial" ? "partial" : "completed",
       });
     }
     stmt.free();
