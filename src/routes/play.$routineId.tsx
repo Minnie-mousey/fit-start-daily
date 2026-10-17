@@ -121,6 +121,7 @@ function Player() {
   }
 
   const step = steps[state.stepIndex];
+  if (!step) return null;
   const isRest = step.type === "rest";
   const workIndex = isRest ? null : step.exerciseIndex;
   const progress = (state.stepIndex / steps.length) * 100;

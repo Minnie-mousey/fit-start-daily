@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { sessions, stats, isLoading, error, retry } = useWorkoutSessions();
-  const featured = ROUTINES[0];
+  const featured = ROUTINES[0]!;
 
   return (
     <Page>
