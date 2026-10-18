@@ -19,7 +19,11 @@ function offlineAppPlugin(): Plugin {
       const assets = Object.keys(bundle).filter((file) =>
         /\.(?:css|js|mjs|wasm|png|jpe?g|webp|svg|ico|woff2?)$/i.test(file),
       );
-      const cacheVersion = createHash("sha256").update(assets.join("|")).digest("hex").slice(0, 12);
+      const cacheVersion = createHash("sha256")
+        .update("prerendered-spa-shell-v1|")
+        .update(assets.join("|"))
+        .digest("hex")
+        .slice(0, 12);
       const cacheName = `fit-start-daily-${cacheVersion}`;
       const worker = `
 const CACHE_NAME = ${JSON.stringify(cacheName)};
