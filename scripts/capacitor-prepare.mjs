@@ -21,6 +21,7 @@ if (mainFiles.length === 0) {
 
 const entryFile = mainFiles[0];
 const cssFile = cssFiles[0] ?? null;
+const assetBase = process.env.GITHUB_PAGES === 'true' ? '/fit-start-daily/' : './';
 
 const html = `<!doctype html>
 <html lang="en">
@@ -30,14 +31,15 @@ const html = `<!doctype html>
     <meta name="theme-color" content="#7c9b6f" />
     <meta name="format-detection" content="telephone=no" />
     <title>Fit Start Daily</title>
-    ${cssFile ? `<link rel="stylesheet" href="./assets/${cssFile}" />` : ''}
+    ${cssFile ? `<link rel="stylesheet" href="${assetBase}assets/${cssFile}" />` : ''}
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./assets/${entryFile}"></script>
+    <script type="module" src="${assetBase}assets/${entryFile}"></script>
   </body>
 </html>
 `;
 
 writeFileSync(path.join(targetDir, 'index.html'), html, 'utf8');
+writeFileSync(path.join(targetDir, '404.html'), html, 'utf8');
 console.log(`Capacitor web assets prepared in ${targetDir}`);

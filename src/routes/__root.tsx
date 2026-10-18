@@ -73,7 +73,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
             Try again
           </button>
           <a
-            href="/"
+            href={import.meta.env.BASE_URL}
             className="inline-flex items-center justify-center rounded-full border border-input bg-background px-5 py-2.5 text-sm font-bold text-foreground"
           >
             Go home
@@ -93,7 +93,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.ico`, type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
@@ -142,7 +142,7 @@ function AppLayout({ inPlayer }: { inPlayer: boolean }) {
   useEffect(() => {
     if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
     void navigator.serviceWorker
-      .register("/service-worker.js")
+      .register(`${import.meta.env.BASE_URL}service-worker.js`)
       .catch((error: unknown) => console.error("Could not register offline app support", error));
   }, []);
   useEffect(() => {

@@ -81,6 +81,9 @@ self.addEventListener("fetch", (event) => {
 }
 
 export default defineConfig({
+  vite: {
+    base: process.env["GITHUB_PAGES"] === "true" ? "/fit-start-daily/" : "/",
+  },
   plugins: [offlineAppPlugin()],
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).

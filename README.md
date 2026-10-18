@@ -2,6 +2,15 @@
 
 Project: Little by Little - Fitness Companion
 
+## Deploying to GitHub Pages
+
+The `Deploy to GitHub Pages` workflow builds and publishes the app to
+`https://<owner>.github.io/fit-start-daily/` whenever changes are pushed to
+`main` (or when run manually from the Actions tab). In the repository settings,
+set **Pages → Build and deployment → Source** to **GitHub Actions**. The build
+also includes a fallback page so app routes work when opened directly or
+refreshed.
+
 You are a senior React Native engineer and mobile product designer. Help me build a polished, beginner-friendly fitness companion app using Expo, React Native and TypeScript.
 
 Product vision
