@@ -9,12 +9,20 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BottomNav } from "@/components/app/BottomNav";
 import { DatabaseProvider } from "@/hooks/use-database";
+import { useGamification } from "@/hooks/use-gamification";
+import { useCalendarEvents, useRecurringReminder, useReminderSnooze } from "@/hooks/use-fitness";
+import { dayKey } from "@/lib/services/stats";
+import {
+  reconcileCalendarReminders,
+  reconcileRecurringReminder,
+} from "@/lib/services/localReminders";
+import { useDatabase } from "@/hooks/use-database";
 
 function NotFoundComponent() {
   return (
@@ -48,7 +56,9 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
@@ -84,12 +94,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap",
-      },
     ],
   }),
   shellComponent: RootShell,
@@ -119,9 +123,89 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <DatabaseProvider>
-        <Outlet />
-        {!inPlayer && <BottomNav />}
+        <AppLayout inPlayer={inPlayer} />
       </DatabaseProvider>
     </QueryClientProvider>
+  );
+}
+
+function AppLayout({ inPlayer }: { inPlayer: boolean }) {
+  const { snapshot } = useGamification();
+  const { state: database } = useDatabase();
+  const reminder = useRecurringReminder();
+  const snooze = useReminderSnooze();
+  const [today, setToday] = useState(() => dayKey(new Date()));
+  const todayEvents = useCalendarEvents(today, today);
+  const equippedTheme = snapshot?.cosmetics.find(
+    (item) => item.id === snapshot.profile.equippedThemeId,
+  );
+  useEffect(() => {
+    if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
+    void navigator.serviceWorker
+      .register("/service-worker.js")
+      .catch((error: unknown) => console.error("Could not register offline app support", error));
+  }, []);
+  useEffect(() => {
+    const refreshDate = () => setToday(dayKey(new Date()));
+    const interval = window.setInterval(refreshDate, 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
+  useEffect(() => {
+    const schedule = reminder.data;
+    if (!schedule || database.status !== "ready") return;
+    if (
+      (!schedule.enabled || schedule.weekdays.length === 0) &&
+      !(todayEvents.data ?? []).some((event) => event.reminderEnabled) &&
+      !snooze.data
+    )
+      return;
+    if (!("Notification" in window)) return;
+    let checking = false;
+    const checkReminder = async () => {
+      if (checking) return;
+      checking = true;
+      const now = new Date();
+      try {
+        await reconcileRecurringReminder(
+          schedule,
+          database.fitness,
+          now,
+          Notification.permission,
+          ({ title, body }) => new Notification(title, { body }),
+        );
+        await reconcileCalendarReminders(
+          todayEvents.data ?? [],
+          schedule,
+          database.fitness,
+          now,
+          Notification.permission,
+          ({ title, body }) => new Notification(title, { body }),
+        );
+      } catch (error) {
+        console.error("Could not reconcile workout reminders", error);
+      } finally {
+        checking = false;
+      }
+    };
+    void checkReminder();
+    const interval = window.setInterval(() => void checkReminder(), 20_000);
+    const resume = () => void checkReminder();
+    window.addEventListener("focus", resume);
+    window.addEventListener("pageshow", resume);
+    document.addEventListener("visibilitychange", resume);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", resume);
+      window.removeEventListener("pageshow", resume);
+      document.removeEventListener("visibilitychange", resume);
+    };
+  }, [database, reminder.data, snooze.data, todayEvents.data]);
+  return (
+    <div
+      className={`min-h-screen bg-background text-foreground ${equippedTheme?.themeClass ?? "theme-meadow"}`}
+    >
+      <Outlet />
+      {!inPlayer && <BottomNav />}
+    </div>
   );
 }

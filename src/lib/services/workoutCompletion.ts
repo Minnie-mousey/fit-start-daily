@@ -1,5 +1,5 @@
 import type { WorkoutSessionRepository } from "@/lib/repositories/workoutSessionRepository";
-import type { WorkoutSession } from "@/lib/types";
+import type { ExercisePerformance, SessionStatus, WorkoutSession } from "@/lib/types";
 
 export interface CompleteWorkoutInput {
   routineId: string;
@@ -9,6 +9,9 @@ export interface CompleteWorkoutInput {
   activeSeconds: number;
   exercisesCompleted: number;
   totalExercises: number;
+  performance?: ExercisePerformance[];
+  outcome?: SessionStatus;
+  idempotencyKey?: string;
 }
 
 /**
@@ -20,16 +23,27 @@ export async function completeWorkout(
   input: CompleteWorkoutInput,
 ): Promise<WorkoutSession> {
   if (input.totalExercises <= 0) throw new Error("Workout has no exercises");
-  if (input.exercisesCompleted <= 0) throw new Error("Complete at least one exercise to save");
+  if (input.exercisesCompleted <= 0 && input.outcome !== "cancelled")
+    throw new Error("Complete at least one exercise to save");
   const done = Math.min(input.exercisesCompleted, input.totalExercises);
-  return repo.save({
-    routineId: input.routineId,
-    routineName: input.routineName,
-    startedAt: input.startedAt.toISOString(),
-    completedAt: input.completedAt.toISOString(),
-    durationSeconds: Math.max(0, Math.round(input.activeSeconds)),
-    exercisesCompleted: done,
-    totalExercises: input.totalExercises,
-    status: done === input.totalExercises ? "completed" : "partial",
-  });
+  const status: SessionStatus =
+    input.outcome === "cancelled"
+      ? "cancelled"
+      : input.outcome === "partial" || done < input.totalExercises
+        ? "partial"
+        : "completed";
+  return repo.save(
+    {
+      routineId: input.routineId,
+      routineName: input.routineName,
+      startedAt: input.startedAt.toISOString(),
+      completedAt: input.completedAt.toISOString(),
+      durationSeconds: Math.max(0, Math.round(input.activeSeconds)),
+      exercisesCompleted: done,
+      totalExercises: input.totalExercises,
+      status,
+    },
+    input.performance,
+    input.idempotencyKey ?? `${input.routineId}:${input.startedAt.toISOString()}`,
+  );
 }

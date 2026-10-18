@@ -1,7 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { Activity, ChevronRight, Flame, Footprints, HandMetal, Wind } from "lucide-react";
-import { CATEGORY_LABELS } from "@/lib/data/exercises";
-import type { Difficulty, Exercise, ExerciseCategory, ExerciseTarget, WorkoutSession } from "@/lib/types";
+import { ACTIVITY_LABELS } from "@/lib/data/exercises";
+import type {
+  Difficulty,
+  Exercise,
+  ExerciseCategory,
+  ExerciseTarget,
+  WorkoutSession,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_STYLE: Record<ExerciseCategory, { icon: typeof Activity; className: string }> = {
@@ -12,7 +18,13 @@ const CATEGORY_STYLE: Record<ExerciseCategory, { icon: typeof Activity; classNam
   mobility: { icon: Wind, className: "bg-secondary text-secondary-foreground" },
 };
 
-export function CategoryIcon({ category, size = "md" }: { category: ExerciseCategory; size?: "md" | "lg" }) {
+export function CategoryIcon({
+  category,
+  size = "md",
+}: {
+  category: ExerciseCategory;
+  size?: "md" | "lg";
+}) {
   const { icon: Icon, className } = CATEGORY_STYLE[category];
   return (
     <span
@@ -33,10 +45,18 @@ export function DifficultyBadge({ difficulty }: { difficulty: Difficulty }) {
     <span
       className={cn(
         "rounded-full px-2.5 py-0.5 text-xs font-bold",
-        difficulty === "beginner" ? "bg-secondary text-secondary-foreground" : "bg-sun text-sun-foreground",
+        difficulty === "beginner"
+          ? "bg-secondary text-secondary-foreground"
+          : difficulty === "intermediate"
+            ? "bg-sun text-sun-foreground"
+            : "bg-primary-soft text-primary",
       )}
     >
-      {difficulty === "beginner" ? "Beginner" : "Intermediate"}
+      {difficulty === "beginner"
+        ? "Beginner"
+        : difficulty === "intermediate"
+          ? "Intermediate"
+          : "Advanced"}
     </span>
   );
 }
@@ -56,7 +76,12 @@ export function ExerciseCard({ exercise }: { exercise: Exercise }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-bold">{exercise.name}</p>
         <p className="text-xs text-muted-foreground">
-          {CATEGORY_LABELS[exercise.category]} · {formatTarget(exercise.target)}
+          {ACTIVITY_LABELS[exercise.activity ?? "bodyweight-strength"]} ·{" "}
+          {formatTarget(exercise.target)}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">
+          {(exercise.targetAreas ?? exercise.muscles).join(", ")} ·{" "}
+          {exercise.equipment?.includes("none") ? "No equipment" : "Support needed"}
         </p>
       </div>
       <DifficultyBadge difficulty={exercise.difficulty} />
@@ -73,19 +98,30 @@ export function formatDuration(seconds: number) {
 
 export function SessionRow({ session }: { session: WorkoutSession }) {
   const date = new Date(session.completedAt);
+  const statusLabel =
+    session.status === "completed"
+      ? "Completed"
+      : session.status === "cancelled"
+        ? "Cancelled"
+        : `${session.exercisesCompleted}/${session.totalExercises} moves`;
   return (
     <li className="flex items-center justify-between rounded-2xl bg-card px-4 py-3 shadow-soft">
       <div>
         <p className="font-bold">{session.routineName}</p>
         <p className="text-xs text-muted-foreground">
-          {date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} ·{" "}
-          {date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+          {date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}{" "}
+          · {date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
         </p>
       </div>
       <div className="text-right">
         <p className="text-sm font-bold">{formatDuration(session.durationSeconds)}</p>
-        <p className={cn("text-xs font-bold", session.status === "completed" ? "text-success" : "text-muted-foreground")}>
-          {session.status === "completed" ? "Completed" : `${session.exercisesCompleted}/${session.totalExercises} moves`}
+        <p
+          className={cn(
+            "text-xs font-bold",
+            session.status === "completed" ? "text-success" : "text-muted-foreground",
+          )}
+        >
+          {statusLabel}
         </p>
       </div>
     </li>

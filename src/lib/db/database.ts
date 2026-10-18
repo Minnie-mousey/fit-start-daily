@@ -7,6 +7,8 @@ import { MIGRATIONS } from "./schema";
  */
 const IDB_NAME = "little-by-little";
 const IDB_STORE = "sqlite";
+const AUDIO_STORE = "audio-files";
+const SAFETY_BACKUP_STORE = "safety-backups";
 const IDB_KEY = "main.db";
 
 let dbPromise: Promise<Database> | null = null;
@@ -65,10 +67,66 @@ export async function persistDatabase(db: Database): Promise<void> {
 
 function openIdb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    const req = indexedDB.open(IDB_NAME, 3);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE);
+      if (!req.result.objectStoreNames.contains(AUDIO_STORE))
+        req.result.createObjectStore(AUDIO_STORE);
+      if (!req.result.objectStoreNames.contains(SAFETY_BACKUP_STORE))
+        req.result.createObjectStore(SAFETY_BACKUP_STORE);
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
+  });
+}
+
+export async function storeSafetyBackup(json: string): Promise<void> {
+  const idb = await openIdb();
+  await new Promise<void>((resolve, reject) => {
+    const tx = idb.transaction(SAFETY_BACKUP_STORE, "readwrite");
+    tx.objectStore(SAFETY_BACKUP_STORE).put(json, "latest");
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error ?? new Error("Could not store the safety backup."));
+  });
+}
+
+export async function storeAudioFile(id: string, file: Blob): Promise<void> {
+  const idb = await openIdb();
+  await new Promise<void>((resolve, reject) => {
+    const request = idb
+      .transaction(AUDIO_STORE, "readwrite")
+      .objectStore(AUDIO_STORE)
+      .put(file, id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function readAudioFile(id: string): Promise<Blob | null> {
+  const idb = await openIdb();
+  return new Promise((resolve, reject) => {
+    const request = idb.transaction(AUDIO_STORE, "readonly").objectStore(AUDIO_STORE).get(id);
+    request.onsuccess = () => resolve((request.result as Blob | undefined) ?? null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function hasAudioFile(id: string): Promise<boolean> {
+  const idb = await openIdb();
+  return new Promise((resolve, reject) => {
+    const request = idb.transaction(AUDIO_STORE, "readonly").objectStore(AUDIO_STORE).getKey(id);
+    request.onsuccess = () => resolve(request.result !== undefined);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function deleteAudioFile(id: string): Promise<void> {
+  const idb = await openIdb();
+  await new Promise<void>((resolve, reject) => {
+    const request = idb.transaction(AUDIO_STORE, "readwrite").objectStore(AUDIO_STORE).delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
   });
 }
 

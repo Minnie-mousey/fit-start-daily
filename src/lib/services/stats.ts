@@ -13,7 +13,9 @@ export function dayKey(date: Date): string {
  * (so the streak isn't "lost" before today's workout).
  */
 export function computeStreak(sessions: WorkoutSession[], now: Date): number {
-  const days = new Set(sessions.map((s) => dayKey(new Date(s.completedAt))));
+  const days = new Set(
+    sessions.filter((s) => s.status !== "cancelled").map((s) => dayKey(new Date(s.completedAt))),
+  );
   const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   if (!days.has(dayKey(cursor))) cursor.setDate(cursor.getDate() - 1);
   let streak = 0;
@@ -25,13 +27,40 @@ export function computeStreak(sessions: WorkoutSession[], now: Date): number {
 }
 
 export function computeStats(sessions: WorkoutSession[], now: Date): WorkoutStats {
+  const counted = sessions.filter((session) => session.status !== "cancelled");
   const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7)); // Monday
-  const totalSeconds = sessions.reduce((sum, s) => sum + s.durationSeconds, 0);
+  const totalSeconds = counted.reduce((sum, s) => sum + s.durationSeconds, 0);
   return {
-    totalWorkouts: sessions.length,
+    totalWorkouts: counted.length,
     totalMinutes: Math.round(totalSeconds / 60),
-    currentStreak: computeStreak(sessions, now),
-    thisWeek: sessions.filter((s) => new Date(s.completedAt) >= weekStart).length,
+    currentStreak: computeStreak(counted, now),
+    thisWeek: counted.filter((s) => new Date(s.completedAt) >= weekStart).length,
+  };
+}
+
+export function computeWorkoutConsistency(
+  sessions: WorkoutSession[],
+  now: Date,
+  windowDays = 30,
+): { activeDays: number; totalDays: number; percentage: number } {
+  if (!Number.isInteger(windowDays) || windowDays < 1)
+    throw new Error("Consistency window must be a positive number of days");
+  const activeDates = new Set(
+    sessions
+      .filter((session) => session.status !== "cancelled")
+      .map((session) => dayKey(new Date(session.completedAt))),
+  );
+  let activeDays = 0;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  for (let offset = 0; offset < windowDays; offset++) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - offset);
+    if (activeDates.has(dayKey(date))) activeDays++;
+  }
+  return {
+    activeDays,
+    totalDays: windowDays,
+    percentage: Math.round((activeDays / windowDays) * 100),
   };
 }

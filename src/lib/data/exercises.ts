@@ -1,4 +1,11 @@
-import type { Exercise, ExerciseCategory, Routine } from "@/lib/types";
+import type {
+  Difficulty,
+  Exercise,
+  ExerciseActivity,
+  ExerciseCategory,
+  Routine,
+} from "@/lib/types";
+import { ADDITIONAL_EXERCISES, ACTIVITY_SOURCES } from "@/lib/data/exerciseLibrary";
 
 export const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
   "lower-body": "Lower body",
@@ -8,7 +15,56 @@ export const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
   mobility: "Mobility",
 };
 
-export const EXERCISES: Exercise[] = [
+export const ACTIVITY_LABELS: Record<ExerciseActivity, string> = {
+  "low-impact-cardio": "Low-impact cardio",
+  "bodyweight-strength": "Bodyweight strength",
+  yoga: "Yoga",
+  flexibility: "Flexibility",
+  stairs: "Stairs",
+  recovery: "Recovery",
+};
+
+export interface ExerciseFilters {
+  query?: string;
+  category?: ExerciseCategory | "all";
+  activity?: ExerciseActivity | "all";
+  difficulty?: Difficulty | "all";
+  targetArea?: string | "all";
+  equipment?: string | "all";
+}
+
+export function filterExercises(exercises: Exercise[], filters: ExerciseFilters): Exercise[] {
+  const query = filters.query?.trim().toLowerCase() ?? "";
+  return exercises.filter((exercise) => {
+    const targetAreas = exercise.targetAreas ?? exercise.muscles;
+    const searchable = [
+      exercise.name,
+      exercise.summary,
+      exercise.activity ? ACTIVITY_LABELS[exercise.activity] : "",
+      ...exercise.muscles,
+      ...targetAreas,
+      ...exercise.steps,
+      ...(exercise.setupRequirements ?? []),
+    ]
+      .join(" ")
+      .toLowerCase();
+    const equipment = exercise.equipment ?? ["none"];
+    return (
+      (!query || searchable.includes(query)) &&
+      (!filters.category || filters.category === "all" || exercise.category === filters.category) &&
+      (!filters.activity || filters.activity === "all" || exercise.activity === filters.activity) &&
+      (!filters.difficulty ||
+        filters.difficulty === "all" ||
+        exercise.difficulty === filters.difficulty) &&
+      (!filters.targetArea ||
+        filters.targetArea === "all" ||
+        targetAreas.includes(filters.targetArea)) &&
+      (!filters.equipment || filters.equipment === "all" || equipment.includes(filters.equipment))
+    );
+  });
+}
+
+const CORE_EXERCISES: Exercise[] = [
   {
     id: "bodyweight-squat",
     name: "Bodyweight Squat",
@@ -204,6 +260,64 @@ export const EXERCISES: Exercise[] = [
   },
 ];
 
+const CORE_ACTIVITY: Record<string, ExerciseActivity> = {
+  "bodyweight-squat": "bodyweight-strength",
+  "glute-bridge": "bodyweight-strength",
+  "reverse-lunge": "bodyweight-strength",
+  "wall-push-up": "bodyweight-strength",
+  "knee-push-up": "bodyweight-strength",
+  "dead-bug": "bodyweight-strength",
+  plank: "bodyweight-strength",
+  "march-in-place": "low-impact-cardio",
+  "step-jack": "low-impact-cardio",
+  "cat-cow": "yoga",
+  "standing-reach": "flexibility",
+};
+
+const VIDEO_DEMONSTRATIONS: Record<string, { label: string; url: string }> = {
+  "bodyweight-squat": {
+    label: "NHS squat video",
+    url: "https://www.nhs.uk/live-well/exercise/strength-and-flex-exercise-plan-how-to-videos/",
+  },
+  "wall-push-up": {
+    label: "NHS standing press-up video",
+    url: "https://www.nhs.uk/live-well/exercise/strength-and-flex-exercise-plan-how-to-videos/",
+  },
+};
+
+function enrichCoreExercise(exercise: Exercise): Exercise {
+  const activity = CORE_ACTIVITY[exercise.id] ?? "bodyweight-strength";
+  const setup = exercise.setupRequirements ?? [];
+  const setupText = setup.join(" ").toLowerCase();
+  const equipment =
+    exercise.equipment ??
+    (setupText.includes("chair")
+      ? ["chair"]
+      : setupText.includes("stair")
+        ? ["stairs"]
+        : setupText.includes("wall") || setupText.includes("counter")
+          ? ["support"]
+          : ["none"]);
+  const demonstration = exercise.demonstration ?? VIDEO_DEMONSTRATIONS[exercise.id];
+  return {
+    ...exercise,
+    activity,
+    targetAreas: exercise.targetAreas ?? exercise.muscles,
+    equipment,
+    setupRequirements: setup,
+    safetyNotes: exercise.safetyNotes ?? exercise.tips,
+    modifications: exercise.modifications ?? [exercise.easier, exercise.harder],
+    alternatives: exercise.alternatives ?? [exercise.easier],
+    source: exercise.source ?? ACTIVITY_SOURCES[activity],
+    ...(demonstration ? { demonstration } : {}),
+  };
+}
+
+export const EXERCISES: Exercise[] = [
+  ...CORE_EXERCISES.map(enrichCoreExercise),
+  ...ADDITIONAL_EXERCISES,
+];
+
 export const ROUTINES: Routine[] = [
   {
     id: "gentle-start",
@@ -258,7 +372,13 @@ export function getRoutine(id: string): Routine | undefined {
   if (id.startsWith(SINGLE_PREFIX)) {
     const ex = getExercise(id.slice(SINGLE_PREFIX.length));
     if (!ex) return undefined;
-    return { id, name: ex.name, description: ex.summary, restSeconds: 0, items: [{ exerciseId: ex.id }] };
+    return {
+      id,
+      name: ex.name,
+      description: ex.summary,
+      restSeconds: 0,
+      items: [{ exerciseId: ex.id }],
+    };
   }
   return ROUTINES.find((r) => r.id === id);
 }

@@ -1,14 +1,42 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { getDatabase, persistDatabase } from "@/lib/db/database";
+import {
+  deleteAudioFile,
+  getDatabase,
+  hasAudioFile,
+  persistDatabase,
+  readAudioFile,
+  storeAudioFile,
+  storeSafetyBackup,
+} from "@/lib/db/database";
 import {
   SqliteWorkoutSessionRepository,
   type WorkoutSessionRepository,
 } from "@/lib/repositories/workoutSessionRepository";
+import {
+  SqliteGamificationRepository,
+  type GamificationRepository,
+} from "@/lib/repositories/gamificationRepository";
+import {
+  SqliteFitnessRepository,
+  type FitnessRepository,
+} from "@/lib/repositories/fitnessRepository";
+import { SqliteMusicRepository, type MusicRepository } from "@/lib/repositories/musicRepository";
+import {
+  LocalSqliteBackupProvider,
+  type UserDataBackupProvider,
+} from "@/lib/services/userDataBackup";
 
 type DbState =
   | { status: "loading" }
   | { status: "error"; error: string }
-  | { status: "ready"; sessions: WorkoutSessionRepository };
+  | {
+      status: "ready";
+      sessions: WorkoutSessionRepository;
+      gamification: GamificationRepository;
+      fitness: FitnessRepository;
+      music: MusicRepository;
+      backup: UserDataBackupProvider;
+    };
 
 const DbContext = createContext<{ state: DbState; retry: () => void }>({
   state: { status: "loading" },
@@ -24,10 +52,28 @@ export function DatabaseProvider({ children }: { children: ReactNode }) {
     setState({ status: "loading" });
     getDatabase()
       .then((db) => {
-        if (!cancelled) setState({ status: "ready", sessions: new SqliteWorkoutSessionRepository(db, persistDatabase) });
+        if (!cancelled) {
+          setState({
+            status: "ready",
+            sessions: new SqliteWorkoutSessionRepository(db, persistDatabase),
+            gamification: new SqliteGamificationRepository(db, persistDatabase),
+            fitness: new SqliteFitnessRepository(db, persistDatabase),
+            music: new SqliteMusicRepository(db, persistDatabase, {
+              put: storeAudioFile,
+              get: readAudioFile,
+              has: hasAudioFile,
+              delete: deleteAudioFile,
+            }),
+            backup: new LocalSqliteBackupProvider(db, persistDatabase, storeSafetyBackup),
+          });
+        }
       })
       .catch((e: unknown) => {
-        if (!cancelled) setState({ status: "error", error: e instanceof Error ? e.message : "Could not open storage" });
+        if (!cancelled)
+          setState({
+            status: "error",
+            error: e instanceof Error ? e.message : "Could not open storage",
+          });
       });
     return () => {
       cancelled = true;

@@ -120,7 +120,9 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
@@ -134,16 +136,488 @@
 }
 
 @keyframes pop-in {
-  0% { transform: scale(0.85); opacity: 0; }
-  60% { transform: scale(1.04); opacity: 1; }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 @utility animate-pop-in {
   animation: pop-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
 
+.mascot-motion[data-mascot="avatar-sprout"] {
+  --mascot-motion: mascot-sprout-motion;
+}
+.mascot-motion[data-mascot="avatar-aqua"] {
+  --mascot-motion: mascot-aqua-motion;
+}
+.mascot-motion[data-mascot="avatar-buttercup"] {
+  --mascot-motion: mascot-buttercup-motion;
+}
+.mascot-motion[data-mascot="avatar-bounce"] {
+  --mascot-motion: mascot-leafy-motion;
+}
+.mascot-motion[data-mascot="avatar-sunbeam"] {
+  --mascot-motion: mascot-lemon-motion;
+}
+.mascot-motion[data-mascot="avatar-lovely"] {
+  --mascot-motion: mascot-lovely-motion;
+}
+.mascot-motion[data-mascot="avatar-melody"] {
+  --mascot-motion: mascot-melody-motion;
+}
+.mascot-motion[data-mascot="avatar-rest"] {
+  --mascot-motion: mascot-om-motion;
+}
+.mascot-motion[data-mascot="avatar-stormy"] {
+  --mascot-motion: mascot-stormy-motion;
+}
+.mascot-motion[data-mascot="avatar-yoga"] {
+  --mascot-motion: mascot-stretch-motion;
+}
+.mascot-motion[data-motion] img {
+  animation: var(--mascot-motion) 680ms cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+.mascot-motion[data-motion="earned"] {
+  animation: mascot-earned-glow 880ms ease-out both;
+}
+.mascot-motion[data-motion="selected"] {
+  animation: mascot-selected-glow 620ms ease-out both;
+}
+
+.theme-preview {
+  --theme-preview-accent: oklch(0.58 0.12 150);
+  --theme-preview-soft: oklch(0.9 0.05 145);
+  background: linear-gradient(145deg, var(--theme-preview-soft), var(--secondary));
+}
+.theme-preview[data-theme="theme-sky"] {
+  --theme-preview-accent: oklch(0.54 0.13 235);
+  --theme-preview-soft: oklch(0.91 0.05 225);
+}
+.theme-preview[data-theme="theme-sunshine"] {
+  --theme-preview-accent: oklch(0.62 0.16 65);
+  --theme-preview-soft: oklch(0.93 0.08 85);
+}
+.theme-preview[data-theme="theme-dusk"] {
+  --theme-preview-accent: oklch(0.56 0.15 355);
+  --theme-preview-soft: oklch(0.92 0.05 5);
+}
+.theme-preview-soft {
+  background: var(--theme-preview-soft);
+  color: var(--theme-preview-accent);
+}
+.theme-preview-accent {
+  background: var(--theme-preview-accent);
+}
+
+@keyframes mascot-sprout-motion {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-12%) scale(1.06, 0.94);
+  }
+  62% {
+    transform: translateY(2%) scale(0.96, 1.04);
+  }
+}
+@keyframes mascot-aqua-motion {
+  0%,
+  100% {
+    transform: rotate(0) scale(1);
+  }
+  35% {
+    transform: rotate(-12deg) scale(0.92);
+  }
+  70% {
+    transform: rotate(10deg) scale(1.04);
+  }
+}
+@keyframes mascot-buttercup-motion {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  40% {
+    transform: rotate(14deg) scale(1.04);
+  }
+  72% {
+    transform: rotate(-9deg) scale(0.96);
+  }
+}
+@keyframes mascot-leafy-motion {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-7%) rotate(-5deg);
+  }
+  55% {
+    transform: translateX(6%) rotate(5deg);
+  }
+  78% {
+    transform: translateX(-3%) rotate(-2deg);
+  }
+}
+@keyframes mascot-lemon-motion {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-13%) scale(0.95, 1.07);
+  }
+  58% {
+    transform: translateY(0) scale(1.08, 0.92);
+  }
+  76% {
+    transform: translateY(-4%) scale(1);
+  }
+}
+@keyframes mascot-lovely-motion {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  32% {
+    transform: scale(1.1);
+  }
+  58% {
+    transform: scale(0.93);
+  }
+  78% {
+    transform: scale(1.04);
+  }
+}
+@keyframes mascot-melody-motion {
+  0%,
+  100% {
+    transform: rotate(0) translateY(0);
+  }
+  28% {
+    transform: rotate(-8deg) translateY(-7%);
+  }
+  52% {
+    transform: rotate(8deg) translateY(1%);
+  }
+  76% {
+    transform: rotate(-4deg) translateY(-3%);
+  }
+}
+@keyframes mascot-om-motion {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-10%);
+  }
+  72% {
+    transform: translateY(2%);
+  }
+}
+@keyframes mascot-stormy-motion {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  22% {
+    transform: translateX(-4%) rotate(-5deg);
+  }
+  45% {
+    transform: translateX(4%) rotate(5deg);
+  }
+  66% {
+    transform: translateX(-3%) rotate(-3deg);
+  }
+  84% {
+    transform: translateX(2%) rotate(2deg);
+  }
+}
+@keyframes mascot-stretch-motion {
+  0%,
+  100% {
+    transform: skewY(0) scaleY(1);
+  }
+  40% {
+    transform: skewY(-4deg) scaleY(1.08);
+  }
+  70% {
+    transform: skewY(3deg) scaleY(0.96);
+  }
+}
+@keyframes mascot-earned-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.58 0.12 150 / 0);
+  }
+  35% {
+    box-shadow: 0 0 0 8px oklch(0.58 0.12 150 / 0.28);
+  }
+}
+@keyframes mascot-selected-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.58 0.12 150 / 0);
+  }
+  45% {
+    box-shadow: 0 0 0 5px oklch(0.58 0.12 150 / 0.26);
+  }
+}
+
+.theme-sky {
+  --primary: oklch(0.54 0.13 235);
+  --primary-foreground: oklch(0.99 0.01 230);
+  --primary-soft: oklch(0.91 0.05 225);
+  --ring: oklch(0.54 0.13 235);
+  --chart-1: oklch(0.54 0.13 235);
+}
+
+.theme-sunshine {
+  --primary: oklch(0.62 0.16 65);
+  --primary-foreground: oklch(0.99 0.02 85);
+  --primary-soft: oklch(0.93 0.08 85);
+  --ring: oklch(0.62 0.16 65);
+  --chart-1: oklch(0.62 0.16 65);
+}
+
+.theme-dusk {
+  --primary: oklch(0.56 0.15 355);
+  --primary-foreground: oklch(0.99 0.01 0);
+  --primary-soft: oklch(0.92 0.05 5);
+  --ring: oklch(0.56 0.15 355);
+  --chart-1: oklch(0.56 0.15 355);
+}
+
+.avatar-frame-preview {
+  position: relative;
+  display: flex;
+  aspect-ratio: 1;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 5px solid;
+  border-radius: 9999px;
+  background: var(--color-secondary);
+  padding: 0.25rem;
+}
+
+.avatar-frame-meadow {
+  border-color: oklch(0.65 0.13 150);
+  background-color: oklch(0.9 0.05 150);
+}
+
+.avatar-frame-sunrise {
+  border-color: oklch(0.77 0.16 78);
+  background-color: oklch(0.94 0.08 85);
+  box-shadow: 0 0 0 2px oklch(0.99 0.03 90);
+}
+
+.avatar-frame-trailblazer {
+  border-color: oklch(0.65 0.16 225);
+  background-color: oklch(0.92 0.05 225);
+  box-shadow: 0 0 0 2px oklch(0.7 0.12 175);
+}
+
+.avatar-frame-flame {
+  border-color: oklch(0.65 0.19 28);
+  background-color: oklch(0.93 0.07 55);
+  box-shadow: 0 0 0 2px oklch(0.77 0.16 78);
+}
+
+.avatar-frame-aurora {
+  border-color: oklch(0.76 0.12 195);
+  background-color: oklch(0.9 0.07 190);
+  box-shadow:
+    0 0 0 2px oklch(0.72 0.17 300),
+    0 0 18px oklch(0.74 0.16 190 / 0.7);
+  animation: avatar-aurora-pulse 4s ease-in-out infinite;
+}
+
+.avatar-frame-stardust {
+  border-color: oklch(0.84 0.13 88);
+  background-color: oklch(0.95 0.07 82);
+  box-shadow:
+    0 0 0 2px oklch(0.75 0.15 285),
+    0 0 16px oklch(0.8 0.13 75 / 0.65);
+  animation: avatar-stardust-glow 3.5s ease-in-out infinite;
+}
+
+.avatar-frame-legend {
+  border-color: oklch(0.8 0.15 72);
+  background-color: oklch(0.92 0.08 75);
+  box-shadow:
+    0 0 0 2px oklch(0.64 0.17 25),
+    0 0 0 5px oklch(0.83 0.14 84 / 0.55),
+    0 0 22px oklch(0.78 0.17 70 / 0.8);
+  animation: avatar-legend-shine 5s linear infinite;
+}
+
+.avatar-frame-banner {
+  position: absolute;
+  z-index: 1;
+  top: -0.55rem;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid oklch(0.99 0.01 90 / 0.75);
+  border-radius: 9999px;
+  background: linear-gradient(110deg, oklch(0.32 0.1 270), oklch(0.48 0.16 325));
+  padding: 0.16rem 0.48rem;
+  color: white;
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px oklch(0.25 0.04 290 / 0.35);
+}
+
+.avatar-frame-banner-compact {
+  top: -0.35rem;
+  padding: 0.1rem 0.28rem;
+  font-size: 0.35rem;
+  letter-spacing: 0.08em;
+}
+
+.avatar-frame-banner.avatar-frame-stardust {
+  background: linear-gradient(110deg, oklch(0.4 0.14 275), oklch(0.58 0.15 68));
+}
+
+.avatar-frame-banner.avatar-frame-legend {
+  background: linear-gradient(110deg, oklch(0.42 0.18 28), oklch(0.63 0.17 72));
+}
+
+.equipped-badge-rare,
+.equipped-badge-epic,
+.equipped-badge-legendary {
+  color: white;
+}
+
+.equipped-badge-rare {
+  background: linear-gradient(145deg, oklch(0.62 0.16 220), oklch(0.48 0.17 285));
+}
+
+.equipped-badge-epic {
+  background: linear-gradient(145deg, oklch(0.67 0.18 320), oklch(0.48 0.19 275));
+  box-shadow: 0 0 12px oklch(0.67 0.18 320 / 0.65);
+}
+
+.equipped-badge-legendary {
+  background: linear-gradient(145deg, oklch(0.8 0.16 82), oklch(0.63 0.19 35));
+  box-shadow: 0 0 14px oklch(0.78 0.16 72 / 0.8);
+  animation: avatar-legend-shine 5s linear infinite;
+}
+
+.achievement-medallion-rare,
+.achievement-medallion-epic,
+.achievement-medallion-legendary {
+  color: white;
+}
+
+.achievement-medallion-rare {
+  background: linear-gradient(145deg, oklch(0.62 0.16 220), oklch(0.48 0.17 285));
+}
+
+.achievement-medallion-epic {
+  background: linear-gradient(145deg, oklch(0.67 0.18 320), oklch(0.48 0.19 275));
+  box-shadow: 0 0 12px oklch(0.67 0.18 320 / 0.5);
+}
+
+.achievement-medallion-legendary {
+  background: linear-gradient(145deg, oklch(0.8 0.16 82), oklch(0.63 0.19 35));
+  box-shadow: 0 0 14px oklch(0.78 0.16 72 / 0.65);
+}
+
+.achievement-rarity {
+  border-radius: 9999px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.achievement-rarity-rare {
+  background: oklch(0.9 0.05 225);
+  color: oklch(0.35 0.12 250);
+}
+
+.achievement-rarity-epic {
+  background: oklch(0.91 0.06 315);
+  color: oklch(0.36 0.14 300);
+}
+
+.achievement-rarity-legendary {
+  background: oklch(0.92 0.08 80);
+  color: oklch(0.38 0.13 50);
+}
+
+@keyframes avatar-aurora-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px oklch(0.72 0.17 300),
+      0 0 12px oklch(0.74 0.16 190 / 0.5);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px oklch(0.75 0.17 190),
+      0 0 22px oklch(0.74 0.16 190 / 0.8);
+  }
+}
+
+@keyframes avatar-stardust-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px oklch(0.75 0.15 285),
+      0 0 12px oklch(0.8 0.13 75 / 0.45);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px oklch(0.78 0.16 310),
+      0 0 22px oklch(0.8 0.13 75 / 0.85);
+  }
+}
+
+@keyframes avatar-legend-shine {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px oklch(0.64 0.17 25),
+      0 0 0 5px oklch(0.83 0.14 84 / 0.45),
+      0 0 14px oklch(0.78 0.17 70 / 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px oklch(0.71 0.18 35),
+      0 0 0 7px oklch(0.86 0.15 84 / 0.7),
+      0 0 24px oklch(0.78 0.17 70 / 0.9);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  .avatar-frame-aurora,
+  .avatar-frame-stardust,
+  .avatar-frame-legend,
+  .equipped-badge-legendary {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }

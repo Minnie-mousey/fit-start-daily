@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDatabase } from "@/hooks/use-database";
+import { GAMIFICATION_KEY } from "@/hooks/use-gamification";
 import { computeStats } from "@/lib/services/stats";
 import { completeWorkout, type CompleteWorkoutInput } from "@/lib/services/workoutCompletion";
 
@@ -30,7 +31,11 @@ export function useCompleteWorkout() {
       if (state.status !== "ready") throw new Error("Storage isn't ready yet");
       return completeWorkout(state.sessions, input);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+    onSuccess: () =>
+      Promise.all([
+        qc.invalidateQueries({ queryKey: KEY }),
+        qc.invalidateQueries({ queryKey: GAMIFICATION_KEY }),
+      ]),
   });
 }
 
