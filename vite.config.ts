@@ -8,6 +8,8 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { createHash } from "node:crypto";
 import type { Plugin } from "vite";
 
+const pagesBase = `/${process.env["GITHUB_REPOSITORY"]?.split("/").at(-1) || "little-by-little"}/`;
+
 function offlineAppPlugin(): Plugin {
   return {
     name: "offline-app",
@@ -82,7 +84,7 @@ self.addEventListener("fetch", (event) => {
 
 export default defineConfig({
   vite: {
-    base: process.env["GITHUB_PAGES"] === "true" ? "/fit-start-daily/" : "/",
+    base: process.env["GITHUB_PAGES"] === "true" ? pagesBase : "/",
   },
   plugins: [offlineAppPlugin()],
   tanstackStart: {
